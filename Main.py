@@ -162,9 +162,19 @@ def signUp () :
 
     saveCredentials(userName , hashedPassword , salt)
 
-    # # it creates a user named file
-    f = open("Encrypted-Password-Saver-Py/Database/" + userName + ".txt" , "x") 
-    f.close()
+    # # it creates a user named file & adds a basic data
+    file = open("Encrypted-Password-Saver-Py/Database/" + userName + ".txt" , "wb") 
+    data = "\n\n" + "Welcome " + userName + "\n\n"
+
+    key = generateKey (password , salt)
+
+    f = Fernet(key)
+
+    data = f.encrypt(data.encode())
+
+    file.write(data)
+
+    file.close()
 
     print("SignUp done successfully")
     print("Now logIn with the same credentials Whenever u want to access , add etc ur data")
@@ -173,7 +183,7 @@ def signUp () :
 
 
 # This function actually takes username and password amd verifies its authenticity 
-# If verified it generates cryptographic key & returns ity
+# If verified it & generates cryptographic key & returns userName & key
 def logIn () : 
 
     userName = input("Enter your userName :- ")
@@ -207,12 +217,13 @@ def logIn () :
     # Which will be used to encrypt & decrypt there data
     key = generateKey(password , storedSalt)
 
-    return key
+    return userName , key
 
 
 
 # This function uses signUp & LogIn function & it sets a good intro for the user 
 # it manages invalid option selection too
+# it also returns the key id user is logIn and verified
 def intro () :
 
     print("=" * 65)
@@ -238,9 +249,13 @@ def intro () :
 
         signUp()
 
+        return None , None # The default return
+
     elif choice == 2 :
 
-        logIn() 
+        userName , key = logIn() 
+
+        return userName , key
 
     else : 
 
@@ -248,11 +263,89 @@ def intro () :
         quit()
 
     
+
+# This Function takes Input from user & stores it in encrypted format in there own private file in the DB
+def addData (userName , key) :
+
+    f = Fernet(key)
+
+    print("\nYou may now begin adding your data below.")
+    print("Type your content freely. When you are finished, type 'END' on a new line and press Enter to submit.\n")
+
+    file = open("Encrypted-Password-Saver-Py/Database/" + userName + ".txt" , "rb")  # because encrypted data is in bytes form not str
+    fullData = file.read()
+    file.close()
+
+    f = Fernet(key)
+    fullData = f.decrypt(fullData)
+    fullData = fullData.decode() # because we gave encoded data while encrypting it so the decrypted data is encoded , we need to decode it before display
+
+    while True :
+
+        data = input() 
+
+        if data == "END" :
+
+            fullData = f.encrypt(fullData.encode())
+
+            file = open("Encrypted-Password-Saver-Py/Database/" + userName + ".txt" , "wb")  # because encrypted data is in bytes form not str
+            file.write(fullData)
+            file.close()
+
+            print("\n✔ Data Saved Securely.")
+            print("Your information is encrypted and cannot be decrypted without your authorized credentials.")
+
+            break
+
+        data += "\n"
+        fullData += data
+
+
+
+# This function fetches the data & decrypts it & displays on the screen
+def displayData (userName , key) :
+
+    file = open("Encrypted-Password-Saver-Py/Database/" + userName + ".txt" , "rb")  # because encrypted data is in bytes form not str
+    data = file.read()
+    f = Fernet(key)
+    data = f.decrypt(data)
+    data = data.decode() # because we gave encoded data while encrypting it so the decrypted data is encoded , we need to decode it before display
+    print(data)
+
+    file.close()
+
+
+
 # Lets start the main code body here
 
-intro()
+# If user selects signUp the this further code wont be executes as there is quit() at end of signUp
+userName ,  key = intro()
 
+print("Please choose an option to continue:")
+print("1️⃣  Add new data to your secure database [Enter 1]")
+print("2️⃣  View the data already stored in your database [Enter 2]\n")
 
+choice = input("Enter Your Choice :- ")
+
+if not choice.isdigit() : 
+
+    print("InValid Option Selected\nTry Again Later")
+    quit()
+
+choice = int(choice)
+
+if choice == 1 :
+
+    addData (userName , key)
+
+elif choice == 2 :
+
+    displayData(userName , key)
+
+else : 
+
+    print("InValid Option Selected\nTry Again Later")
+    quit()
     
 
 
