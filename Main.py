@@ -123,9 +123,9 @@ def retrieveCredentials (userName) :
 def signUp () :
 
     userName = input("Enter a userName :- ") 
-    print("Remember if u forgot the password u will set for ur profile")
+    print("\nRemember if u forgot the password u will set for ur profile")
     print("Then there is now way to recover , as it uses the highest level of security")
-    print("Even we dont know your password , we never store the password u set")
+    print("Even we dont know your password , we never store the password u set\n")
     password = input("Enter a really strong password :- ")
 
     f = open("Encrypted-Password-Saver-Py/Database/userNameDatabase.txt" , "r") 
@@ -176,7 +176,7 @@ def signUp () :
 
     file.close()
 
-    print("SignUp done successfully")
+    print("\nSignUp done successfully\n")
     print("Now logIn with the same credentials Whenever u want to access , add etc ur data")
     quit()
 
@@ -191,7 +191,7 @@ def logIn () :
     # It checks if the username is valid or not
     if not userNameValidityCheck(userName) :
 
-        print("User doesn't exists")
+        print("\nUser doesn't exists")
         print("Try to login a valid username")
         print("OR")
         print("SignUp")
@@ -204,11 +204,11 @@ def logIn () :
 
     if passwordValidityCheck(password , StoredPassword) :
 
-        print("Login Successful")
+        print("\nLogin Successful\n")
 
     else : 
 
-        print("Invalid Password")
+        print("\nInvalid Password")
         print("Try another password")
 
         quit()
@@ -233,14 +233,15 @@ def intro () :
     print("User authentication is required to protect your data integrity.")
     print("=" * 65)
 
-    print("\nPlease choose an option:")
+    print("\nPlease choose an option:\n")
     print("Sign Up (Create a new secure account) [Enter 1]")
-    print("Log In  (Access your encrypted data) [Enter 2]")
+    print("Log In  (Access your encrypted data) [Enter 2]\n")
     choice = input("Enter Your Choice :- ")
+    print("\n")
 
     if not choice.isdigit() : 
 
-        print("InValid Option Selected\nTry Again Later")
+        print("\nInValid Option Selected\nTry Again Later")
         quit()
 
     choice = int(choice)
@@ -259,7 +260,7 @@ def intro () :
 
     else : 
 
-        print("InValid Option Selected\nTry Again Later")
+        print("\nInValid Option Selected\nTry Again Later")
         quit()
 
     
@@ -316,33 +317,75 @@ def displayData (userName , key) :
 
 
 
+#  This function clears all the files data , & resets the file 
+def clearData (userName , key) :
+
+    file = open("Encrypted-Password-Saver-Py/Database/" + userName + ".txt" , "wb") 
+    data = "\n\n" + "Welcome " + userName + "\n\n"
+
+    f = Fernet(key)
+
+    data = f.encrypt(data.encode())
+
+    file.write(data)
+
+    file.close()
+
+
+
+# This function manages user data
+# It gives user opt to add more data , view all the data , delete all the data 
+def handle_user_data_operations (userName , key) :
+
+    print("Please choose an option to continue:\n")
+    print("1️⃣  Add new data to your secure database [Enter 1]\n")
+    print("2️⃣  View the data already stored in your database [Enter 2]\n")
+    print("3️⃣  Clear ALL stored data from your database (This will NOT delete your account) [Enter 3]\n")
+
+    choice = input("Enter Your Choice :- ")
+
+    if not choice.isdigit() : 
+
+        print("\nInValid Option Selected\nTry Again Later")
+        quit()
+
+    choice = int(choice)
+
+    if choice == 1 :
+
+        addData (userName , key)
+
+    elif choice == 2 :
+
+        displayData(userName , key)
+
+    elif choice == 3:
+
+        print("\n⚠️ WARNING: This will permanently delete ALL your stored data.")
+        confirm = input("Type YES to confirm: ")
+
+        if confirm == "YES":
+
+            clearData(userName , key)
+            print("\n✅ All stored data has been successfully cleared.")
+
+        else:
+
+            print("\nOperation cancelled.")
+
+    else : 
+
+        print("\nInValid Option Selected\nTry Again Later")
+        quit()    
+
+
+
+# ----------------------------------
 # Lets start the main code body here
+# ----------------------------------
 
-# If user selects signUp the this further code wont be executes as there is quit() at end of signUp
-userName ,  key = intro()
 
-print("Please choose an option to continue:")
-print("1️⃣  Add new data to your secure database [Enter 1]")
-print("2️⃣  View the data already stored in your database [Enter 2]\n")
 
-choice = input("Enter Your Choice :- ")
+userName ,  key = intro() # If user selects signUp the this further code wont be executes as there is quit() at end of signUp
 
-if not choice.isdigit() : 
-
-    print("InValid Option Selected\nTry Again Later")
-    quit()
-
-choice = int(choice)
-
-if choice == 1 :
-
-    addData (userName , key)
-
-elif choice == 2 :
-
-    displayData(userName , key)
-
-else : 
-
-    print("InValid Option Selected\nTry Again Later")
-    quit()
+handle_user_data_operations(userName , key) # giving user opt so they could perform diff operation [on / with their] data
